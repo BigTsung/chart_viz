@@ -27,7 +27,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-               
+
                 Button("Import CSV") { openCSV() }
                 Spacer()
             }
@@ -35,17 +35,17 @@ struct ContentView: View {
 
             Chart {
                 ForEach(points) { point in
-                                   if verticalBars {
+                    if verticalBars {
                         BarMark(
                             x: .value(xAxisLabel, point.label),
                             y: .value(yAxisLabel, point.value)
                         )
                         .foregroundStyle(color)
                         .cornerRadius(cornerRadius)
-                                           } else {
-                                               BarMark(
-                                                   x: .value(yAxisLabel, point.value),
-                                                   y: .value(xAxisLabel, point.label)
+                    } else {
+                        BarMark(
+                            x: .value(yAxisLabel, point.value),
+                            y: .value(xAxisLabel, point.label)
 
                         )
                         .foregroundStyle(color)
@@ -64,34 +64,31 @@ struct ContentView: View {
             )
 
             Form {
-                Section("Data") {
+                Section("資料與標籤") {
                     TextEditor(text: $manualData)
                         .frame(height: 80)
                         .onChange(of: manualData) { _ in
                             points = parseCSV(manualData)
                         }
-                    Button("Apply Data") {
+                    Button("套用資料") {
                         points = parseCSV(manualData)
                     }
+                    TextField("標題", text: $title)
+                    TextField("X 軸名稱", text: $xAxisLabel)
+                    TextField("Y 軸名稱", text: $yAxisLabel)
                 }
-                Section("Labels") {
-                    TextField("Title", text: $title)
-                    TextField("X Axis", text: $xAxisLabel)
-                    TextField("Y Axis", text: $yAxisLabel)
+                Section("顏色") {
+                    ColorPicker("主要色彩", selection: $color)
                 }
-                Section("Style") {
-                    Toggle("Show Legend", isOn: $showLegend)
-                  
-                    ColorPicker("Color", selection: $color)
+                Section("類型") {
+                    Toggle("顯示圖例", isOn: $showLegend)
+                    Toggle("直向呈現", isOn: $verticalBars)
+                    HStack {
+                        Text("圓角大小")
+                        Slider(value: $cornerRadius, in: 0...10)
+                    }
                 }
-                Section("Bar Settings") {
-                                    Toggle("Vertical Orientation", isOn: $verticalBars)
-                                    HStack {
-                                        Text("Corner Radius")
-                                        Slider(value: $cornerRadius, in: 0...10)
-                                    }
-                                }
-                Section("Export") {
+                Section("輸出") {
                     HStack {
                         Button("PNG") { exportImage(type: .png) }
                         Button("JPEG") { exportImage(type: .jpeg) }
@@ -162,17 +159,17 @@ struct ContentView: View {
     private var chartView: some View {
         Chart {
             ForEach(points) { point in
-                          if verticalBars {
+                if verticalBars {
                     BarMark(
                         x: .value(xAxisLabel, point.label),
                         y: .value(yAxisLabel, point.value)
                     )
                     .foregroundStyle(color)
                     .cornerRadius(cornerRadius)
-                                    } else {
-                                        BarMark(
-                                            x: .value(yAxisLabel, point.value),
-                                            y: .value(xAxisLabel, point.label)
+                } else {
+                    BarMark(
+                        x: .value(yAxisLabel, point.value),
+                        y: .value(xAxisLabel, point.label)
 
                     )
                     .foregroundStyle(color)
