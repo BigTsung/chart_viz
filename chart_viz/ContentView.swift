@@ -22,72 +22,59 @@ struct ContentView: View {
     @State private var showLegend = true
     @State private var verticalBars = true
     @State private var cornerRadius: Double = 0
+    @State private var barWidth: Double = 10
+    @State private var opacity: Double = 1.0
+    @State private var showXAxis = true
+    @State private var showYAxis = true
     @State private var color = Color.accentColor
 
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-
                 Button("Import CSV") { openCSV() }
                 Spacer()
             }
             .padding(.bottom)
 
-            Chart {
-                ForEach(points) { point in
-                    if verticalBars {
-                        BarMark(
-                            x: .value(xAxisLabel, point.label),
-                            y: .value(yAxisLabel, point.value)
-                        )
-                        .foregroundStyle(color)
-                        .cornerRadius(cornerRadius)
-                    } else {
-                        BarMark(
-                            x: .value(yAxisLabel, point.value),
-                            y: .value(xAxisLabel, point.label)
-
-                        )
-                        .foregroundStyle(color)
-                        .cornerRadius(cornerRadius)
-                    }
-                }
-            }
-            .chartLegend(showLegend ? .visible : .hidden)
-            .frame(height: 300)
-            .padding()
-            .overlay(
-                Text(title)
-                    .font(.title)
-                    .padding([.top]),
-                alignment: .top
-            )
-
-            Form {
-                Section("資料與標籤") {
-                    TextEditor(text: $manualData)
-                        .frame(height: 80)
-                        .onChange(of: manualData) { _ in
+            HStack(alignment: .top) {
+                Form {
+                    Section("資料與標籤") {
+                        TextEditor(text: $manualData)
+                            .frame(height: 80)
+                            .onChange(of: manualData) { _ in
+                                points = parseCSV(manualData)
+                            }
+                        Button("套用資料") {
                             points = parseCSV(manualData)
                         }
-                    Button("套用資料") {
-                        points = parseCSV(manualData)
+                        TextField("標題", text: $title)
+                        TextField("X 軸名稱", text: $xAxisLabel)
+                        TextField("Y 軸名稱", text: $yAxisLabel)
                     }
-                    TextField("標題", text: $title)
-                    TextField("X 軸名稱", text: $xAxisLabel)
-                    TextField("Y 軸名稱", text: $yAxisLabel)
+                    Section("外觀") {
+                        ColorPicker("主要色彩", selection: $color)
+                        HStack {
+                            Text("圓角大小")
+                            Slider(value: $cornerRadius, in: 0...10)
+                        }
+                        HStack {
+                            Text("寬度")
+                            Slider(value: $barWidth, in: 2...30)
+                        }
+                        HStack {
+                            Text("透明度")
+                            Slider(value: $opacity, in: 0.2...1)
+                        }
+                    }
                 }
-                Section("顏色") {
-                    ColorPicker("主要色彩", selection: $color)
-                }
-                Section("類型") {
+
+                Section("軸線與圖例") {
                     Toggle("顯示圖例", isOn: $showLegend)
                     Toggle("直向呈現", isOn: $verticalBars)
-                    HStack {
-                        Text("圓角大小")
-                        Slider(value: $cornerRadius, in: 0...10)
-                    }
+                    Toggle("顯示 X 軸", isOn: $showXAxis)
+                    Toggle("顯示 Y 軸", isOn: $showYAxis)
                 }
+                //
                 Section("輸出") {
                     HStack {
                         Button("PNG") { exportImage(type: .png) }
@@ -95,10 +82,20 @@ struct ContentView: View {
                         Button("PDF") { exportPDF() }
                     }
                 }
+                .frame(minWidth: 250)
+
+                chartView
+                    .padding()
+                    .overlay(
+                        Text(title)
+                            .font(.title)
+                            .padding([.top]),
+                        alignment: .top
+                    )
             }
+            .padding()
+            .frame(minWidth: 700, minHeight: 600)
         }
-        .padding()
-        .frame(minWidth: 600, minHeight: 600)
     }
 
     private func parseCSV(_ text: String) -> [ChartPoint] {
@@ -162,26 +159,29 @@ struct ContentView: View {
                 if verticalBars {
                     BarMark(
                         x: .value(xAxisLabel, point.label),
-                        y: .value(yAxisLabel, point.value)
+                        y: .value(yAxisLabel, point.value),
+                        width: .fixed(barWidth)
                     )
-                    .foregroundStyle(color)
+                    .foregroundStyle(color.opacity(opacity))
                     .cornerRadius(cornerRadius)
                 } else {
                     BarMark(
                         x: .value(yAxisLabel, point.value),
-                        y: .value(xAxisLabel, point.label)
+                        y: .value(xAxisLabel, point.label),
+                        width: .fixed(barWidth)
 
                     )
-                    .foregroundStyle(color)
+                    .foregroundStyle(color.opacity(opacity))
                     .cornerRadius(cornerRadius)
                 }
             }
         }
         .chartLegend(showLegend ? .visible : .hidden)
+        .chartXAxis(showXAxis ? .automatic : .hidden)
+        .chartYAxis(showYAxis ? .automatic : .hidden)
         .frame(width: 400, height: 300)
     }
 }
-
 #Preview {
     ContentView()
 }
