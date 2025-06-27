@@ -177,14 +177,22 @@ struct ContentView: View {
                         width: .fixed(barWidth)
                     )
                     if multipleSeries {
-                        mark =
-                            mark
-                            .foregroundStyle(by: .value("Series", point.series))
-                            .opacity(opacity)
+                        BarMark(
+                            x: .value(xAxisLabel, point.label),
+                            y: .value(yAxisLabel, point.value),
+                            width: .fixed(barWidth)
+                        )
+                        .foregroundStyle(by: .value("Series", point.series))
+                        .opacity(opacity)
+                        .cornerRadius(cornerRadius)
                     } else {
-                        mark =
-                            mark
-                            .foregroundStyle(color.opacity(opacity))
+                        BarMark(
+                            x: .value(xAxisLabel, point.label),
+                            y: .value(yAxisLabel, point.value),
+                            width: .fixed(barWidth)
+                        )
+                        .foregroundStyle(color.opacity(opacity))
+                        .cornerRadius(cornerRadius)
                     }
                     mark
                         .cornerRadius(cornerRadius)
@@ -196,14 +204,22 @@ struct ContentView: View {
 
                     )
                     if multipleSeries {
-                        mark =
-                            mark
-                            .foregroundStyle(by: .value("Series", point.series))
-                            .opacity(opacity)
+                        BarMark(
+                            x: .value(xAxisLabel, point.label),
+                            y: .value(yAxisLabel, point.value),
+                            width: .fixed(barWidth)
+                        )
+                        .foregroundStyle(by: .value("Series", point.series))
+                        .opacity(opacity)
+                        .cornerRadius(cornerRadius)
                     } else {
-                        mark =
-                            mark
-                            .foregroundStyle(color.opacity(opacity))
+                        BarMark(
+                            x: .value(xAxisLabel, point.label),
+                            y: .value(yAxisLabel, point.value),
+                            width: .fixed(barWidth)
+                        )
+                        .foregroundStyle(color.opacity(opacity))
+                        .cornerRadius(cornerRadius)
                     }
                     mark
                         .cornerRadius(cornerRadius)
