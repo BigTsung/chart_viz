@@ -14,10 +14,4 @@ struct ChartPoint: Identifiable {
     var value: Double
 }
 
-enum ChartKind: String, CaseIterable, Identifiable {
-    case bar = "Bar"
-    case line = "Line"
-    case pie = "Pie"
-
-    var id: String { rawValue }
-}
+// Only bar charts are supported so the kind enum has been removed.

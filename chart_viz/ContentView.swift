@@ -16,56 +16,40 @@ struct ContentView: View {
         ChartPoint(label: "B", value: 2),
         ChartPoint(label: "C", value: 3),
     ]
-    @State private var chartType: ChartKind = .bar
     @State private var title = "Sample Chart"
     @State private var xAxisLabel = "X"
     @State private var yAxisLabel = "Y"
     @State private var showLegend = true
-    @State private var lineDash = false
+    @State private var verticalBars = true
+    @State private var cornerRadius: Double = 0
     @State private var color = Color.accentColor
 
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                Picker("Chart", selection: $chartType) {
-                    ForEach(ChartKind.allCases) { kind in
-                        Text(kind.rawValue).tag(kind)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
+               
                 Button("Import CSV") { openCSV() }
                 Spacer()
             }
             .padding(.bottom)
 
             Chart {
-                switch chartType {
-                case .bar:
-                    ForEach(points) { point in
+                ForEach(points) { point in
+                                   if verticalBars {
                         BarMark(
                             x: .value(xAxisLabel, point.label),
                             y: .value(yAxisLabel, point.value)
                         )
                         .foregroundStyle(color)
-                    }
-                case .line:
-                    ForEach(points) { point in
-                        LineMark(
-                            x: .value(xAxisLabel, point.label),
-                            y: .value(yAxisLabel, point.value)
+                        .cornerRadius(cornerRadius)
+                                           } else {
+                                               BarMark(
+                                                   x: .value(yAxisLabel, point.value),
+                                                   y: .value(xAxisLabel, point.label)
+
                         )
                         .foregroundStyle(color)
-                        .lineStyle(
-                            StrokeStyle(lineWidth: 2, dash: lineDash ? [5] : [])
-                        )
-                    }
-                case .pie:
-                    ForEach(points) { point in
-                        SectorMark(
-                            angle: .value(yAxisLabel, point.value),
-                            innerRadius: .ratio(0.5)
-                        )
-                        .foregroundStyle(by: .value(xAxisLabel, point.label))
+                        .cornerRadius(cornerRadius)
                     }
                 }
             }
@@ -97,9 +81,16 @@ struct ContentView: View {
                 }
                 Section("Style") {
                     Toggle("Show Legend", isOn: $showLegend)
-                    Toggle("Dashed Line", isOn: $lineDash)
+                  
                     ColorPicker("Color", selection: $color)
                 }
+                Section("Bar Settings") {
+                                    Toggle("Vertical Orientation", isOn: $verticalBars)
+                                    HStack {
+                                        Text("Corner Radius")
+                                        Slider(value: $cornerRadius, in: 0...10)
+                                    }
+                                }
                 Section("Export") {
                     HStack {
                         Button("PNG") { exportImage(type: .png) }
@@ -170,33 +161,22 @@ struct ContentView: View {
 
     private var chartView: some View {
         Chart {
-            switch chartType {
-            case .bar:
-                ForEach(points) { point in
+            ForEach(points) { point in
+                          if verticalBars {
                     BarMark(
                         x: .value(xAxisLabel, point.label),
                         y: .value(yAxisLabel, point.value)
                     )
                     .foregroundStyle(color)
-                }
-            case .line:
-                ForEach(points) { point in
-                    LineMark(
-                        x: .value(xAxisLabel, point.label),
-                        y: .value(yAxisLabel, point.value)
+                    .cornerRadius(cornerRadius)
+                                    } else {
+                                        BarMark(
+                                            x: .value(yAxisLabel, point.value),
+                                            y: .value(xAxisLabel, point.label)
+
                     )
                     .foregroundStyle(color)
-                    .lineStyle(
-                        StrokeStyle(lineWidth: 2, dash: lineDash ? [5] : [])
-                    )
-                }
-            case .pie:
-                ForEach(points) { point in
-                    SectorMark(
-                        angle: .value(yAxisLabel, point.value),
-                        innerRadius: .ratio(0.5)
-                    )
-                    .foregroundStyle(by: .value(xAxisLabel, point.label))
+                    .cornerRadius(cornerRadius)
                 }
             }
         }
