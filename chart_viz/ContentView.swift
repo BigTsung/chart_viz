@@ -66,20 +66,18 @@ struct ContentView: View {
                             Slider(value: $opacity, in: 0.2...1)
                         }
                     }
-                }
-
-                Section("軸線與圖例") {
-                    Toggle("顯示圖例", isOn: $showLegend)
-                    Toggle("直向呈現", isOn: $verticalBars)
-                    Toggle("顯示 X 軸", isOn: $showXAxis)
-                    Toggle("顯示 Y 軸", isOn: $showYAxis)
-                }
-                //
-                Section("輸出") {
-                    HStack {
-                        Button("PNG") { exportImage(type: .png) }
-                        Button("JPEG") { exportImage(type: .jpeg) }
-                        Button("PDF") { exportPDF() }
+                    Section("軸線與圖例") {
+                        Toggle("顯示圖例", isOn: $showLegend)
+                        Toggle("直向呈現", isOn: $verticalBars)
+                        Toggle("顯示 X 軸", isOn: $showXAxis)
+                        Toggle("顯示 Y 軸", isOn: $showYAxis)
+                    }
+                    Section("輸出") {
+                        HStack {
+                            Button("PNG") { exportImage(type: .png) }
+                            Button("JPEG") { exportImage(type: .jpeg) }
+                            Button("PDF") { exportPDF() }
+                        }
                     }
                 }
                 .frame(minWidth: 250)
