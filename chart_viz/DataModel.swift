@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ChartPoint: Identifiable {
     let id = UUID()
+    var series: String
     var label: String
     var value: Double
 }

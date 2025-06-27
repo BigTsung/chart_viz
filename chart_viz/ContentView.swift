@@ -10,11 +10,15 @@ import Charts
 import SwiftUI
 
 struct ContentView: View {
-    @State private var manualData = "Label,Value\nA,1\nB,2\nC,3"
+    @State private var manualData =
+        "Label,Series 1,Series 2\nA,1,2\nB,2,3\nC,3,1"
     @State private var points: [ChartPoint] = [
-        ChartPoint(label: "A", value: 1),
-        ChartPoint(label: "B", value: 2),
-        ChartPoint(label: "C", value: 3),
+        ChartPoint(series: "Series 1", label: "A", value: 1),
+        ChartPoint(series: "Series 1", label: "B", value: 2),
+        ChartPoint(series: "Series 1", label: "C", value: 3),
+        ChartPoint(series: "Series 2", label: "A", value: 2),
+        ChartPoint(series: "Series 2", label: "B", value: 3),
+        ChartPoint(series: "Series 2", label: "C", value: 1),
     ]
     @State private var title = "Sample Chart"
     @State private var xAxisLabel = "X"
@@ -99,10 +103,21 @@ struct ContentView: View {
     private func parseCSV(_ text: String) -> [ChartPoint] {
         var result: [ChartPoint] = []
         let rows = text.split(separator: "\n")
-        for row in rows.dropFirst() {  // skip header
+        guard let headerRow = rows.first else { return result }
+        let headers = headerRow.split(separator: ",").map(String.init)
+        let seriesNames = Array(headers.dropFirst())
+
+        for row in rows.dropFirst() {
             let parts = row.split(separator: ",")
-            if parts.count >= 2, let value = Double(parts[1]) {
-                result.append(ChartPoint(label: String(parts[0]), value: value))
+            guard parts.count >= 2 else { continue }
+            let label = String(parts[0])
+            for (index, series) in seriesNames.enumerated() {
+                if parts.count > index + 1, let value = Double(parts[index + 1])
+                {
+                    result.append(
+                        ChartPoint(series: series, label: label, value: value)
+                    )
+                }
             }
         }
         return result
@@ -152,7 +167,8 @@ struct ContentView: View {
     }
 
     private var chartView: some View {
-        Chart {
+        let multipleSeries = Set(points.map(\.series)).count > 1
+        return Chart {
             ForEach(points) { point in
                 if verticalBars {
                     BarMark(
@@ -160,8 +176,13 @@ struct ContentView: View {
                         y: .value(yAxisLabel, point.value),
                         width: .fixed(barWidth)
                     )
-                    .foregroundStyle(color.opacity(opacity))
-                    .cornerRadius(cornerRadius)
+                    .applyStyle(
+                                            series: point.series,
+                                            multiple: multipleSeries,
+                                            color: color,
+                                            cornerRadius: cornerRadius,
+                                            opacity: opacity
+                                        )
                 } else {
                     BarMark(
                         x: .value(yAxisLabel, point.value),
@@ -169,8 +190,13 @@ struct ContentView: View {
                         width: .fixed(barWidth)
 
                     )
-                    .foregroundStyle(color.opacity(opacity))
-                    .cornerRadius(cornerRadius)
+                    .applyStyle(
+                        series: point.series,
+                        multiple: multipleSeries,
+                        color: color,
+                        cornerRadius: cornerRadius,
+                        opacity: opacity
+                    )
                 }
             }
         }
@@ -179,6 +205,47 @@ struct ContentView: View {
         .chartYAxis(showYAxis ? .automatic : .hidden)
         .frame(width: 400, height: 300)
     }
+
+    private struct StyleModifier: ViewModifier {
+            let series: String
+            let multiple: Bool
+            let color: Color
+            let cornerRadius: Double
+            let opacity: Double
+
+            func body(content: Content) -> some View {
+                if multiple {
+                    content
+                        .foregroundStyle(by: .value("Series", series))
+                        .cornerRadius(cornerRadius)
+                        .opacity(opacity)
+                } else {
+                    content
+                        .foregroundStyle(color.opacity(opacity))
+                        .cornerRadius(cornerRadius)
+                }
+            }
+        }
+    }
+
+    private extension View {
+        func applyStyle(
+            series: String,
+            multiple: Bool,
+            color: Color,
+            cornerRadius: Double,
+            opacity: Double
+        ) -> some View {
+            modifier(
+                ContentView.StyleModifier(
+                    series: series,
+                    multiple: multiple,
+                    color: color,
+                    cornerRadius: cornerRadius,
+                    opacity: opacity
+                )
+            )
+        }
 }
 #Preview {
     ContentView()
