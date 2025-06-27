@@ -83,6 +83,9 @@ struct ContentView: View {
                 Section("Data") {
                     TextEditor(text: $manualData)
                         .frame(height: 80)
+                        .onChange(of: manualData) { _ in
+                            points = parseCSV(manualData)
+                        }
                     Button("Apply Data") {
                         points = parseCSV(manualData)
                     }
