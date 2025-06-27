@@ -171,32 +171,42 @@ struct ContentView: View {
         return Chart {
             ForEach(points) { point in
                 if verticalBars {
-                    BarMark(
+                    var mark = BarMark(
                         x: .value(xAxisLabel, point.label),
                         y: .value(yAxisLabel, point.value),
                         width: .fixed(barWidth)
                     )
-                    .applyStyle(
-                                            series: point.series,
-                                            multiple: multipleSeries,
-                                            color: color,
-                                            cornerRadius: cornerRadius,
-                                            opacity: opacity
-                                        )
+                    if multipleSeries {
+                        mark =
+                            mark
+                            .foregroundStyle(by: .value("Series", point.series))
+                            .opacity(opacity)
+                    } else {
+                        mark =
+                            mark
+                            .foregroundStyle(color.opacity(opacity))
+                    }
+                    mark
+                        .cornerRadius(cornerRadius)
                 } else {
-                    BarMark(
+                    var mark = BarMark(
                         x: .value(yAxisLabel, point.value),
                         y: .value(xAxisLabel, point.label),
                         width: .fixed(barWidth)
 
                     )
-                    .applyStyle(
-                        series: point.series,
-                        multiple: multipleSeries,
-                        color: color,
-                        cornerRadius: cornerRadius,
-                        opacity: opacity
-                    )
+                    if multipleSeries {
+                        mark =
+                            mark
+                            .foregroundStyle(by: .value("Series", point.series))
+                            .opacity(opacity)
+                    } else {
+                        mark =
+                            mark
+                            .foregroundStyle(color.opacity(opacity))
+                    }
+                    mark
+                        .cornerRadius(cornerRadius)
                 }
             }
         }
@@ -205,47 +215,6 @@ struct ContentView: View {
         .chartYAxis(showYAxis ? .automatic : .hidden)
         .frame(width: 400, height: 300)
     }
-
-    private struct StyleModifier: ViewModifier {
-            let series: String
-            let multiple: Bool
-            let color: Color
-            let cornerRadius: Double
-            let opacity: Double
-
-            func body(content: Content) -> some View {
-                if multiple {
-                    content
-                        .foregroundStyle(by: .value("Series", series))
-                        .cornerRadius(cornerRadius)
-                        .opacity(opacity)
-                } else {
-                    content
-                        .foregroundStyle(color.opacity(opacity))
-                        .cornerRadius(cornerRadius)
-                }
-            }
-        }
-    }
-
-    private extension View {
-        func applyStyle(
-            series: String,
-            multiple: Bool,
-            color: Color,
-            cornerRadius: Double,
-            opacity: Double
-        ) -> some View {
-            modifier(
-                ContentView.StyleModifier(
-                    series: series,
-                    multiple: multiple,
-                    color: color,
-                    cornerRadius: cornerRadius,
-                    opacity: opacity
-                )
-            )
-        }
 }
 #Preview {
     ContentView()
